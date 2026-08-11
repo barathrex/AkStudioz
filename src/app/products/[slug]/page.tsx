@@ -58,6 +58,8 @@ export default async function ProductDetailPage({ params }: Props) {
                   src={product.product_images?.[0]?.image_url || ""}
                   alt={product.name}
                   fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  quality={80}
                   className="object-cover"
                   priority
                 />

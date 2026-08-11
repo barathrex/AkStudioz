@@ -7,7 +7,7 @@ export const categories: Category[] = [
     slug: "camera-rentals",
     description: "Professional Sony, Canon, Nikon & more",
     image_url:
-      "https://images.unsplash.com/photo-1516035069371-29a1b244cc58?w=800&q=80",
+      "https://images.unsplash.com/photo-1516035069371-29a1b244cc58?auto=format&fit=crop&w=600&q=75",
   },
   {
     id: "2",
@@ -15,7 +15,7 @@ export const categories: Category[] = [
     slug: "camera-accessories",
     description: "Lenses, gimbals, tripods & monitors",
     image_url:
-      "https://images.unsplash.com/photo-1606986628035-b1774eb9a6ee?w=800&q=80",
+      "https://images.unsplash.com/photo-1606986628035-b1774eb9a6ee?auto=format&fit=crop&w=600&q=75",
   },
   {
     id: "3",
@@ -23,7 +23,7 @@ export const categories: Category[] = [
     slug: "lighting",
     description: "Godox, Aputure, Nanlite & RGB lights",
     image_url:
-      "https://images.unsplash.com/photo-1598484609097-2a7d0b0a0b0a?w=800&q=80",
+      "https://images.unsplash.com/photo-1598484609097-2a7d0b0a0b0a?auto=format&fit=crop&w=600&q=75",
   },
   {
     id: "4",
@@ -31,7 +31,7 @@ export const categories: Category[] = [
     slug: "event-equipment",
     description: "LED walls, photo booths & stage lights",
     image_url:
-      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&q=80",
+      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=600&q=75",
   },
   {
     id: "5",
@@ -39,7 +39,7 @@ export const categories: Category[] = [
     slug: "event-services",
     description: "Photography, videography & live streaming",
     image_url:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
+      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=75",
   },
 ];
 

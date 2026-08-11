@@ -18,8 +18,23 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = await createClient();
+
+    // Check if email already exists in profiles
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", email.toLowerCase().trim())
+      .maybeSingle();
+
+    if (existingProfile) {
+      return NextResponse.json(
+        { error: "An account with this email address already exists. Please sign in." },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.toLowerCase().trim(),
       password,
       options: {
         data: {
@@ -30,6 +45,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) throw error;
+
+    // Supabase Auth returns an empty identities array if identity protection is active and user exists
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      return NextResponse.json(
+        { error: "An account with this email address already exists. Please sign in." },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json({
       user: data.user,

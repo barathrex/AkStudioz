@@ -40,6 +40,8 @@ export async function FeaturedProducts() {
                     src={product.product_images?.[0]?.image_url || ""}
                     alt={product.name}
                     fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    quality={75}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute top-3 right-3 glass px-2 py-1 rounded text-xs text-gold">

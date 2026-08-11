@@ -50,7 +50,7 @@ export default async function CategoryPage({ params }: Props) {
                 <StaggerItem key={product.id}>
                   <Link href={`/products/${product.slug}`} className="group block glass-card overflow-hidden hover:border-gold/30 transition-colors">
                     <div className="relative aspect-[4/3]">
-                      <Image src={product.product_images?.[0]?.image_url || ""} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <Image src={product.product_images?.[0]?.image_url || ""} alt={product.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" quality={75} className="object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
                     <div className="p-6">
                       <h2 className="font-semibold group-hover:text-gold transition-colors">{product.name}</h2>

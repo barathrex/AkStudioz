@@ -21,21 +21,15 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name, phone } },
+      options: {
+        data: {
+          full_name,
+          phone: phone || "",
+        },
+      },
     });
 
     if (error) throw error;
-
-    // Use upsert to safely handle the auto-trigger that already creates a profile on signUp
-    if (data.user) {
-      await supabase.from("profiles").upsert({
-        id: data.user.id,
-        full_name,
-        email,
-        phone: phone || "",
-        role: "user",
-      }, { onConflict: "id" });
-    }
 
     return NextResponse.json({
       user: data.user,
@@ -48,4 +42,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
 

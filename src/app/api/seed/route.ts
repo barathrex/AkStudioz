@@ -78,7 +78,8 @@ export async function GET(request: Request) {
     }
 
     return NextResponse.json({ success: true, message: "Database seeded successfully!" });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || error }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

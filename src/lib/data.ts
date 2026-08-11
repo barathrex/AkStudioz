@@ -1,6 +1,6 @@
 import { categories as mockCategories, products as mockProducts } from "./mock-data";
 import { isSupabaseConfigured } from "./supabase/client";
-import { createClient } from "./supabase/server";
+import { createPublicClient } from "./supabase/server";
 import { Category, Product } from "@/types";
 
 export async function getCategories(): Promise<Category[]> {
@@ -8,7 +8,7 @@ export async function getCategories(): Promise<Category[]> {
     return mockCategories;
   }
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("categories")
       .select("*")
@@ -39,7 +39,7 @@ export async function getProducts(options?: { categorySlug?: string; featured?: 
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     
     // First, if categorySlug filter is present, resolve the category ID
     let categoryId: string | null = null;
@@ -72,8 +72,6 @@ export async function getProducts(options?: { categorySlug?: string; featured?: 
     const { data, error } = await query;
     if (error) throw error;
     
-    // Normalize data: products from Supabase might have product_images or categories array
-    // conforming to the Product type
     return (data || []) as Product[];
   } catch (err) {
     console.error("Error fetching products from Supabase, falling back to mock data:", err);
@@ -98,7 +96,7 @@ export async function getProduct(slugOrId: string): Promise<Product | null> {
     return mockProducts.find((p) => p.slug === slugOrId || p.id === slugOrId) || null;
   }
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("products")
       .select("*, product_images(*), categories(*)")

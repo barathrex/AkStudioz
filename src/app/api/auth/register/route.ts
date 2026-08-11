@@ -26,19 +26,26 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    // Use upsert to safely handle the auto-trigger that already creates a profile on signUp
     if (data.user) {
-      await supabase.from("profiles").insert({
+      await supabase.from("profiles").upsert({
         id: data.user.id,
         full_name,
         email,
         phone: phone || "",
         role: "user",
-      });
+      }, { onConflict: "id" });
     }
 
-    return NextResponse.json({ user: data.user });
+    return NextResponse.json({
+      user: data.user,
+      message: data.user?.email_confirmed_at
+        ? "Registration successful"
+        : "Registration successful! Please check your email to confirm your account.",
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Registration failed";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+

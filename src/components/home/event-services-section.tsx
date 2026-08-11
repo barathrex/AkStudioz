@@ -1,63 +1,64 @@
 import Link from "next/link";
-import Image from "next/image";
-import { Camera, Video, Plane, Radio } from "lucide-react";
+import { Camera, Video, Radio, Monitor, ArrowRight, CheckCircle2 } from "lucide-react";
 import { eventServices } from "@/lib/mock-data";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
+import { Button } from "@/components/ui/button";
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+const iconMap = {
   Camera,
   Video,
-  Plane,
   Radio,
+  Monitor,
 };
 
 export function EventServicesSection() {
   return (
-    <section className="section-padding bg-background">
+    <section className="section-padding bg-slate-50 border-t border-slate-200">
       <div className="max-w-7xl mx-auto">
         <FadeIn className="text-center mb-16">
-          <span className="text-gold text-sm tracking-[0.3em] uppercase">
-            Services
+          <span className="inline-block text-red-600 text-xs font-bold tracking-[0.25em] uppercase bg-red-100/80 px-3 py-1 rounded-full border border-red-200 mb-3">
+            Full Event Solutions
           </span>
-          <h2 className="text-3xl md:text-5xl font-display font-bold mt-4">
-            Popular Event Services
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-extrabold text-slate-900">
+            Event & Production Services
           </h2>
+          <p className="text-slate-600 mt-4 max-w-2xl mx-auto text-base">
+            Turnkey photography, live streaming, LED wall setups, and crew support for corporate events, weddings, and concerts.
+          </p>
         </FadeIn>
 
-        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {eventServices.map((service) => {
-            const Icon = iconMap[service.icon] || Camera;
+            const Icon = iconMap[service.icon as keyof typeof iconMap] || Camera;
             return (
               <StaggerItem key={service.title}>
-                <Link
-                  href="/categories/event-services"
-                  className="group block glass-card overflow-hidden hover:border-gold/30 transition-all duration-300"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <Image
-                      src={service.image}
-                      alt={service.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors" />
-                    <div className="absolute top-4 left-4 w-10 h-10 rounded-lg bg-gold/20 backdrop-blur flex items-center justify-center">
-                      <Icon className="w-5 h-5 text-gold" />
-                    </div>
+                <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-md hover:shadow-2xl hover:border-red-500 transition-all duration-300 group">
+                  <div className="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center mb-6 group-hover:bg-red-600 group-hover:text-white transition-all shadow-sm">
+                    <Icon className="w-6 h-6" />
                   </div>
-                  <div className="p-5">
-                    <h3 className="font-semibold mb-2 group-hover:text-gold transition-colors">
-                      {service.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {service.description}
-                    </p>
+                  <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-red-600 transition-colors">
+                    {service.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-4">
+                    {service.description}
+                  </p>
+                  <div className="flex items-center text-xs font-bold text-red-600">
+                    <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                    Turnkey Setup Included
                   </div>
-                </Link>
+                </div>
               </StaggerItem>
             );
           })}
         </StaggerContainer>
+
+        <FadeIn className="text-center">
+          <Button variant="gold" size="lg" asChild>
+            <Link href="/contact">
+              Request Service Quote <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
+        </FadeIn>
       </div>
     </section>
   );

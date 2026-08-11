@@ -43,10 +43,16 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        redbrand: {
+          DEFAULT: "#E50914",
+          light: "#FF2E38",
+          dark: "#B91C1C",
+          soft: "#FEF2F2",
+        },
         gold: {
-          DEFAULT: "#C9A962",
-          light: "#E8D5A3",
-          dark: "#9A7B3C",
+          DEFAULT: "#E50914",
+          light: "#FF2E38",
+          dark: "#B91C1C",
         },
       },
       borderRadius: {
@@ -61,7 +67,8 @@ const config: Config = {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "hero-gradient":
-          "linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.85) 100%)",
+          "linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.9) 100%)",
+        "red-gradient": "linear-gradient(135deg, #E50914 0%, #991B1B 100%)",
       },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out forwards",

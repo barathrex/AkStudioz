@@ -71,21 +71,21 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         scrolled
-          ? "bg-background/90 backdrop-blur-xl border-b border-white/10 shadow-lg"
-          : "bg-background/40 backdrop-blur-md"
+          ? "bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-md"
+          : "bg-white/70 backdrop-blur-md border-b border-slate-100"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-gold-dark via-gold to-gold-light flex items-center justify-center font-bold text-black text-xs sm:text-sm group-hover:scale-105 transition-transform shadow-md">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 via-red-500 to-rose-700 flex items-center justify-center font-extrabold text-white text-sm shadow-md group-hover:scale-105 transition-transform">
               AK
             </div>
             <div>
-              <span className="font-display text-base sm:text-lg font-bold tracking-wide block leading-none">
+              <span className="font-display text-lg font-bold tracking-wide block leading-none text-slate-900">
                 AKStudioz
               </span>
-              <span className="text-[9px] sm:text-[10px] text-gold tracking-[0.2em] uppercase block mt-0.5">
+              <span className="text-[10px] text-red-600 font-semibold tracking-[0.2em] uppercase block mt-0.5">
                 Camera Rentals
               </span>
             </div>
@@ -96,7 +96,7 @@ export function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-xs xl:text-sm text-muted-foreground hover:text-gold transition-colors tracking-wide uppercase font-medium"
+                className="text-xs xl:text-sm text-slate-600 hover:text-red-600 font-semibold transition-colors tracking-wide uppercase"
               >
                 {link.label}
               </Link>
@@ -108,12 +108,12 @@ export function Header() {
               <div className="flex items-center gap-3">
                 <Link
                   href={user.role === "admin" ? "/admin" : "/dashboard"}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-gold/50 transition-all group"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 hover:border-red-400 transition-all group shadow-sm"
                 >
-                  <div className="w-7 h-7 rounded-full bg-gold/20 text-gold flex items-center justify-center text-xs font-bold">
+                  <div className="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs font-bold">
                     {user.full_name.charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-xs font-medium text-foreground group-hover:text-gold transition-colors max-w-[120px] truncate">
+                  <span className="text-xs font-semibold text-slate-800 group-hover:text-red-600 transition-colors max-w-[120px] truncate">
                     {user.full_name}
                   </span>
                 </Link>
@@ -121,7 +121,7 @@ export function Header() {
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="text-xs border-white/10 hover:border-destructive/50 hover:text-destructive"
+                  className="text-xs border-slate-200 hover:border-red-500 hover:text-red-600"
                 >
                   <LogOut className="w-3.5 h-3.5 mr-1" />
                   Logout
@@ -129,7 +129,7 @@ export function Header() {
               </div>
             ) : (
               <>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="outline" size="sm" className="border-slate-200 hover:text-red-600 hover:border-red-500" asChild>
                   <Link href="/login">
                     <LogIn className="w-4 h-4 mr-1" />
                     Login
@@ -143,7 +143,7 @@ export function Header() {
           </div>
 
           <button
-            className="lg:hidden p-2 text-foreground hover:text-gold transition-colors"
+            className="lg:hidden p-2 text-slate-800 hover:text-red-600 transition-colors"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -158,17 +158,17 @@ export function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-background/98 backdrop-blur-2xl border-b border-white/10 shadow-2xl"
+            className="lg:hidden bg-white/95 backdrop-blur-2xl border-b border-slate-200 shadow-2xl"
           >
             <nav className="flex flex-col px-4 py-4 gap-2">
               {!loading && user && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-gold/10 border border-gold/20 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-gold text-black flex items-center justify-center font-bold text-xs">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-red-50 border border-red-200 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-xs">
                     {user.full_name.charAt(0).toUpperCase()}
                   </div>
                   <div className="overflow-hidden">
-                    <p className="text-xs font-bold text-foreground truncate">{user.full_name}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                    <p className="text-xs font-bold text-slate-900 truncate">{user.full_name}</p>
+                    <p className="text-[10px] text-slate-500 truncate">{user.email}</p>
                   </div>
                 </div>
               )}
@@ -178,27 +178,27 @@ export function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className="py-2.5 px-3 rounded-md text-sm text-muted-foreground hover:text-gold hover:bg-white/5 transition-colors uppercase tracking-wide font-medium"
+                  className="py-2.5 px-3 rounded-md text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors uppercase font-semibold tracking-wide"
                 >
                   {link.label}
                 </Link>
               ))}
 
-              <div className="flex flex-col gap-2 pt-4 border-t border-white/10 mt-2">
+              <div className="flex flex-col gap-2 pt-4 border-t border-slate-200 mt-2">
                 {!loading && user ? (
                   <>
-                    <Button variant="outline" className="w-full justify-start text-xs" asChild>
+                    <Button variant="outline" className="w-full justify-start text-xs border-slate-200" asChild>
                       <Link
                         href={user.role === "admin" ? "/admin" : "/dashboard"}
                         onClick={() => setIsOpen(false)}
                       >
-                        <LayoutDashboard className="w-4 h-4 mr-2 text-gold" />
+                        <LayoutDashboard className="w-4 h-4 mr-2 text-red-600" />
                         Dashboard
                       </Link>
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-xs text-destructive hover:bg-destructive/10"
+                      className="w-full justify-start text-xs text-red-600 hover:bg-red-50"
                       onClick={() => {
                         setIsOpen(false);
                         handleLogout();
@@ -210,7 +210,7 @@ export function Header() {
                   </>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
-                    <Button variant="outline" className="w-full" asChild>
+                    <Button variant="outline" className="w-full border-slate-200" asChild>
                       <Link href="/login" onClick={() => setIsOpen(false)}>
                         <User className="w-4 h-4 mr-1" />
                         Login

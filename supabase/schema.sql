@@ -94,18 +94,26 @@ ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: users can read/update own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Bookings: users can view/create own bookings
+DROP POLICY IF EXISTS "Users can view own bookings" ON bookings;
 CREATE POLICY "Users can view own bookings" ON bookings FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users can create bookings" ON bookings;
 CREATE POLICY "Users can create bookings" ON bookings FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Documents: users can view own documents
+DROP POLICY IF EXISTS "Users can view own documents" ON documents;
 CREATE POLICY "Users can view own documents" ON documents FOR SELECT
   USING (booking_id IN (SELECT id FROM bookings WHERE user_id = auth.uid()));
 
 -- Admin policies (service role bypasses RLS)
+DROP POLICY IF EXISTS "Admins full access profiles" ON profiles;
 CREATE POLICY "Admins full access profiles" ON profiles FOR ALL
   USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 

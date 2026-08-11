@@ -662,3 +662,69 @@ export const eventServices = [
     icon: "Monitor",
   },
 ];
+
+export const faqs = [
+  {
+    question: "What documents are required to rent equipment?",
+    answer: "You need a valid government-issued photo ID (Aadhar/PAN/Passport), proof of address, and a refundable security deposit. For high-value items, we may require additional verification.",
+  },
+  {
+    question: "How does the security deposit work?",
+    answer: "A refundable security deposit is collected at the time of booking. It is fully returned within 2-3 business days after equipment is returned in the same condition.",
+  },
+  {
+    question: "Can I extend my rental period?",
+    answer: "Yes! Contact us at least 24 hours before your return date to extend. Extensions are subject to availability and will be charged at the daily rental rate.",
+  },
+  {
+    question: "Do you deliver equipment?",
+    answer: "Yes, we offer doorstep delivery and pickup within Chennai city limits. Delivery charges may apply based on distance and equipment size.",
+  },
+  {
+    question: "What happens if equipment is damaged?",
+    answer: "Minor wear and tear is expected and covered. For significant damage, repair costs will be deducted from the security deposit. We recommend rental insurance for high-value gear.",
+  },
+  {
+    question: "Do you provide technical support during my rental?",
+    answer: "Absolutely! Our team provides 24/7 phone support, and we can arrange on-site technical assistance for events and productions at an additional cost.",
+  },
+];
+
+export const galleryImages = [
+  { src: "https://images.unsplash.com/photo-1516035069371-29a1b244cc58?auto=format&fit=crop&w=600&q=75", alt: "Cinema camera setup" },
+  { src: "https://images.unsplash.com/photo-1502927717964-4310427f9f99?auto=format&fit=crop&w=600&q=75", alt: "Film production" },
+  { src: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=75", alt: "Event setup" },
+  { src: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=600&q=75", alt: "Studio lighting" },
+  { src: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=600&q=75", alt: "Concert stage" },
+  { src: "https://images.unsplash.com/photo-1606986628035-b1774eb9a6ee?auto=format&fit=crop&w=600&q=75", alt: "Camera accessories" },
+  { src: "https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&w=600&q=75", alt: "Drone shot" },
+  { src: "https://images.unsplash.com/photo-1512790182412-b19e6d62bc39?auto=format&fit=crop&w=600&q=75", alt: "Mirrorless camera" },
+];
+
+export const reviews = [
+  {
+    name: "Rajesh Subramanian",
+    role: "Wedding Filmmaker",
+    content: "AKStudioz provided pristine Sony FX3 cameras and Aputure lights for our 3-day wedding shoot. Equipment was spotless and support was phenomenal.",
+    rating: 5,
+  },
+  {
+    name: "Priya Venkatesh",
+    role: "Content Creator",
+    content: "Rented the Canon R5 C for a brand campaign. The image quality and color science were incredible. Will definitely rent again!",
+    rating: 5,
+  },
+  {
+    name: "Arun Prakash",
+    role: "Event Manager",
+    content: "The LED wall panels and JBL speakers transformed our corporate event. AKStudioz handled setup and teardown seamlessly.",
+    rating: 5,
+  },
+  {
+    name: "Deepika Rajan",
+    role: "Short Film Director",
+    content: "RED Komodo rental was a game-changer for our indie film. The global shutter footage looked absolutely cinematic.",
+    rating: 4,
+  },
+];
+

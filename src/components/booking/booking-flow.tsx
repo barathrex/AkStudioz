@@ -95,14 +95,37 @@ export function BookingFlow({ product }: BookingFlowProps) {
         }),
       });
 
+      const bookingData = {
+        id: "bk-" + Date.now(),
+        created_at: new Date().toISOString(),
+        start_date: startDate,
+        end_date: endDate,
+        total_days: rentalDays,
+        total_amount: rentalAmount,
+        security_deposit: securityDeposit,
+        booking_status: "confirmed",
+        product_name: product.name,
+        product_slug: product.slug,
+        user_name: name,
+        user_phone: phone,
+        user_email: email,
+      };
+
+      try {
+        const existing = JSON.parse(localStorage.getItem("ak_user_bookings") || "[]");
+        localStorage.setItem("ak_user_bookings", JSON.stringify([bookingData, ...existing]));
+      } catch (e) {
+        console.error("Error storing booking locally:", e);
+      }
+
       if (res.ok) {
         const data = await res.json();
-        router.push(`/dashboard/bookings?success=${data.booking?.id || "1"}`);
+        router.push(`/dashboard/bookings?success=${data.booking?.id || bookingData.id}`);
       } else {
-        router.push("/dashboard/bookings?success=1");
+        router.push(`/dashboard/bookings?success=${bookingData.id}`);
       }
     } catch {
-      router.push("/dashboard/bookings?success=1");
+      router.push(`/dashboard/bookings?success=bk-${Date.now()}`);
     }
   };
 

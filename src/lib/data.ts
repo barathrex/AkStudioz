@@ -13,8 +13,10 @@ export async function getCategories(): Promise<Category[]> {
       .from("categories")
       .select("*")
       .order("name");
-    if (error) throw error;
-    return data || [];
+    if (error || !data || data.length === 0) {
+      return mockCategories;
+    }
+    return data;
   } catch (err) {
     console.error("Error fetching categories from Supabase, falling back to mock data:", err);
     return mockCategories;
@@ -29,7 +31,7 @@ export async function getProducts(options?: { categorySlug?: string; featured?: 
       if (cat) {
         filtered = filtered.filter((p) => p.category_id === cat.id);
       } else {
-        return [];
+        return mockProducts.filter((p) => p.category_id === "1");
       }
     }
     if (options?.featured) {
@@ -41,19 +43,17 @@ export async function getProducts(options?: { categorySlug?: string; featured?: 
   try {
     const supabase = createPublicClient();
     
-    // First, if categorySlug filter is present, resolve the category ID
     let categoryId: string | null = null;
     if (options?.categorySlug) {
-      const { data: category, error: catErr } = await supabase
+      const { data: category } = await supabase
         .from("categories")
         .select("id")
         .eq("slug", options.categorySlug)
         .single();
       
-      if (catErr || !category) {
-        return [];
+      if (category) {
+        categoryId = category.id;
       }
-      categoryId = category.id;
     }
 
     let query = supabase
@@ -70,9 +70,21 @@ export async function getProducts(options?: { categorySlug?: string; featured?: 
     }
 
     const { data, error } = await query;
-    if (error) throw error;
+    if (error || !data || data.length === 0) {
+      let filtered = mockProducts;
+      if (options?.categorySlug) {
+        const cat = mockCategories.find((c) => c.slug === options.categorySlug);
+        if (cat) {
+          filtered = filtered.filter((p) => p.category_id === cat.id);
+        }
+      }
+      if (options?.featured) {
+        filtered = filtered.slice(0, 4);
+      }
+      return filtered;
+    }
     
-    return (data || []) as Product[];
+    return data as Product[];
   } catch (err) {
     console.error("Error fetching products from Supabase, falling back to mock data:", err);
     let filtered = mockProducts;
@@ -80,8 +92,6 @@ export async function getProducts(options?: { categorySlug?: string; featured?: 
       const cat = mockCategories.find((c) => c.slug === options.categorySlug);
       if (cat) {
         filtered = filtered.filter((p) => p.category_id === cat.id);
-      } else {
-        return [];
       }
     }
     if (options?.featured) {
@@ -102,7 +112,9 @@ export async function getProduct(slugOrId: string): Promise<Product | null> {
       .select("*, product_images(*), categories(*)")
       .or(`id.eq.${slugOrId},slug.eq.${slugOrId}`)
       .single();
-    if (error) throw error;
+    if (error || !data) {
+      return mockProducts.find((p) => p.slug === slugOrId || p.id === slugOrId) || null;
+    }
     return data as Product;
   } catch (err) {
     console.error(`Error fetching product ${slugOrId} from Supabase, falling back to mock data:`, err);

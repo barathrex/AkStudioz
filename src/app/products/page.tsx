@@ -8,7 +8,7 @@ import { CheckCircle, Tag } from "lucide-react";
 
 export const metadata = {
   title: "Products Catalog | AKStudioz Camera Rentals",
-  description: "Browse 20+ professional cinema cameras, lenses, lighting and event equipment.",
+  description: "Browse professional cinema cameras, lenses, lighting and event equipment.",
 };
 
 export default async function ProductsPage() {

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FadeIn } from "@/components/animations/fade-in";
-import { ShieldCheck } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -44,11 +43,6 @@ export default function LoginPage() {
     }
   };
 
-  const setAdminDemo = () => {
-    setEmail("admin@akstudioz.com");
-    setPassword("admin123456");
-  };
-
   return (
     <div className="pt-24 md:pt-32 min-h-screen flex items-center justify-center section-padding bg-slate-50">
       <FadeIn className="w-full max-w-md">
@@ -61,23 +55,6 @@ export default function LoginPage() {
         </div>
 
         <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xl space-y-6">
-          {/* Quick Access Helper */}
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl space-y-2">
-            <span className="text-xs font-bold text-red-600 block flex items-center gap-1">
-              <ShieldCheck className="w-4 h-4" /> Admin Access Test Demo:
-            </span>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={setAdminDemo}
-                className="w-full text-[11px] h-8 border-red-200 text-red-600 hover:bg-red-600 hover:text-white font-bold"
-              >
-                Fill Admin Credentials
-              </Button>
-            </div>
-          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (

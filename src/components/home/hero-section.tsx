@@ -62,7 +62,7 @@ export function HeroSection() {
         >
           <Button variant="gold" size="xl" className="w-full sm:w-auto shadow-red-600/30 shadow-lg" asChild>
             <Link href="/products">
-              Explore Equipment Catalog (20+)
+              Explore Equipment Catalog
               <ArrowRight className="w-5 h-5 ml-1" />
             </Link>
           </Button>

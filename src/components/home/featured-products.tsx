@@ -24,7 +24,7 @@ export async function FeaturedProducts() {
           <FadeIn>
             <Button variant="outline" className="border-slate-200 hover:border-red-500 hover:text-red-600 font-semibold" asChild>
               <Link href="/products">
-                View All 20+ Items <ArrowRight className="w-4 h-4 ml-2" />
+                View Complete Catalog <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
           </FadeIn>

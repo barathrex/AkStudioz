@@ -1,4 +1,4 @@
-import { Shield, Clock, Award, Headphones, Truck, Check } from "lucide-react";
+import { Shield, Clock, Award, Headphones } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 
 const features = [

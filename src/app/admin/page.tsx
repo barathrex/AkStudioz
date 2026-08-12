@@ -1,8 +1,7 @@
 import { getProducts } from "@/lib/data";
 import { FadeIn } from "@/components/animations/fade-in";
-import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-import { Package, Calendar, Users, DollarSign, ArrowRight } from "lucide-react";
+import { Package, Calendar, Users, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata = { title: "Admin Dashboard" };

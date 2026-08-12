@@ -20,7 +20,7 @@ export default function GalleryPage() {
             {galleryImages.map((image, i) => (
               <StaggerItem key={i}>
                 <div className="relative aspect-[4/3] rounded-xl overflow-hidden group">
-                  <Image src={image} alt={`Gallery ${i + 1}`} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <Image src={image.src} alt={image.alt || `Gallery ${i + 1}`} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                 </div>
               </StaggerItem>
             ))}

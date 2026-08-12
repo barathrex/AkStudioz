@@ -30,8 +30,8 @@ export function GalleryPreview() {
             <StaggerItem key={i}>
               <div className="relative aspect-square rounded-xl overflow-hidden group">
                 <Image
-                  src={image}
-                  alt={`Gallery image ${i + 1}`}
+                  src={image.src}
+                  alt={image.alt || `Gallery image ${i + 1}`}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />

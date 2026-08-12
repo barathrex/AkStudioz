@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FadeIn } from "@/components/animations/fade-in";
 import { formatCurrency } from "@/lib/utils";
-import { Calendar, Phone, Mail, User, Package, CheckCircle2, Clock, Search, Send } from "lucide-react";
+import { Calendar, Phone, Mail, User, Package, Clock, Search, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 

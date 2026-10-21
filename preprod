@@ -1,0 +1,555 @@
+#user  nobody;
+worker_processes  1;
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+	#more_clear_headers Server;
+    server_tokens off;
+    etag off;
+    
+ 
+    
+    add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload" always;
+    add_header X-Frame-Options SAMEORIGIN  always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Access-Control-Allow-Credentials "" always;
+	#more_set_headers "X-Powered-By: ";
+	#more_set_headers "ETag: ";
+    add_header ETag "";
+    add_header Content-Security-Policy "default-src 'self' *.hdfclife.com blob:; img-src 'self' *.hdfclife.com data:; media-src 'self' *.hdfclife.com; script-src 'self' *.hdfclife.com 'unsafe-eval' 'unsafe-inline' blob:; style-src 'self' *.hdfclife.com *.googleapis.com 'unsafe-inline'; worker-src 'self' blob:; font-src 'self' *.hdfclife.com fonts.gstatic.com; frame-src 'self' data: blob:;" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Access-Control-Allow-Origin "https://partnerpp.hdfclife.com" always;
+    																		   
+
+																			  
+																  
+																	
+
+ 
+    log_format  main  '$remote_addr - $remote_user [$time_local] $http_x_forwarded_proto "$request" '
+                     '$status $body_bytes_sent "$http_referer" '
+                     '"$http_user_agent" "$http_x_amzn_trace_id" "$cookie_SESSION" "$http_x_forwarded_for"';
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+    
+	# This added to handle request tebt timeouts
+    #proxy_read_timeout 180;
+    #proxy_send_timeout 180;
+    #send_timeout 180;
+    #client_body_timeout 180;
+    #lingering_timeout 180;
+    proxy_read_timeout 900;
+    proxy_send_timeout 900;
+    send_timeout 100;
+    client_body_timeout 100;
+    lingering_timeout 100;
+ 
+    real_ip_header    X-Forwarded-For;
+    set_real_ip_from 0.0.0.0/0;
+ 
+    client_max_body_size       5m;
+    #gzip  on;
+
+	map $sent_http_content_type $expires {
+    	default                    off;
+    	text/html                  epoch;
+    	text/css                   max;
+    	application/javascript     max;
+    	~image/                    max;
+    }
+ 
+   upstream qlikcluster {
+                #server hlqvapp2.hdfcsldm.com:443;
+                server ec2amaz-e4nhvic.hdfcsldm.com:443;
+  }	   
+ 
+    server {
+        listen       8080;
+        server_name "";
+    expires $expires;
+			access_log  logs/access.log  main;
+                error_page   500 502 503 504 403 404  /ErrorDocument/error_ip.html;
+                if ( $http_user_agent ~ 'ELB-HealthChecker' ) {
+                        return 200 Success;
+                }
+		if ($request_method ~ ^(OPTIONS)$ ){
+			return 403;
+		}
+                location /ErrorDocument {
+                        root .;
+                        allow all;
+                }
+		location /auth {
+			allow all;
+                	proxy_set_header Host $host;
+                	proxy_set_header X-Real-IP $remote_addr;
+                	proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                	proxy_pass http://localhost:8089;
+        	}
+ 
+        	location /apigateway {
+			allow all;
+                	proxy_set_header Host $host;
+                	proxy_set_header X-Real-IP $remote_addr;
+                	proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                	proxy_pass http://localhost:8089;
+        	}
+             
+           location /wow {
+			allow all;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            proxy_pass http://localhost:8089;
+        }
+
+        	location /cloudapigateway {
+			allow all;
+                	proxy_set_header Host $host;
+                	proxy_set_header X-Real-IP $remote_addr;
+                	proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                	proxy_pass http://localhost:8089;
+		}
+                deny all ;
+        }
+	map $http_upgrade $connection_upgrade {
+		default upgrade;
+		'' close;
+	}
+ 
+    server {
+        listen       8080;
+        server_name  partnerpp.hdfclife.com;
+
+
+       add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload" always;
+add_header X-Frame-Options SAMEORIGIN always;
+add_header X-Content-Type-Options nosniff always;
+
+# CORS
+add_header Access-Control-Allow-Credentials "" always;
+add_header Access-Control-Allow-Origin "https://partnerpp.hdfclife.com" always;
+
+# Disable ETag
+add_header ETag "";
+
+# CSP block
+add_header Content-Security-Policy "default-src 'self' *.hdfclife.com blob:; img-src 'self' *.hdfclife.com data:; media-src 'self' *.hdfclife.com; script-src 'self' *.hdfclife.com 'unsafe-eval' 'unsafe-inline' blob:; style-src 'self' *.hdfclife.com *.googleapis.com 'unsafe-inline'; worker-src 'self' blob:; font-src 'self' *.hdfclife.com fonts.gstatic.com; frame-src 'self' data: blob:;" always;
+
+add_header X-XSS-Protection "1; mode=block" always;
+
+
+        proxy_cookie_flags SESSION secure httponly samesite=strict;
+        proxy_cookie_flags PCSPSAUTH secure httponly samesite=strict;
+        #charset koi8-r;
+        #access_log  logs/host.access.log  main;
+
+        #location / {
+         #   root   html;
+          #  index  index.html index.htm;
+        #}
+
+        #error_page  404              /404.html;
+	expires $expires;
+ 
+   ssl_protocols TLSv1.3;
+    ssl_prefer_server_ciphers off;
+ 
+        access_log  logs/pcsps.access.log  main;
+	if ($request_method ~ ^(OPTIONS)$ ){
+                        return 403;
+        }
+        location / {
+		root /apps/application/preprod/nginx/partner-new/browser;
+		index index.html;
+		try_files $uri $uri/ /index.html;
+		}
+
+                        location = /partner-legacy/partner-login {
+                        return 301 https://partnerpp.hdfclife.com/;
+                       }
+
+       location  ^~ /partner-legacy/{
+				alias   /apps/application/preprod/nginx/html/;
+				index  index.html;
+				try_files $uri $uri/ /partner-legacy/index.html;
+				
+			}
+
+
+       location /mount {
+                alias /apps/application/contest;
+		   autoindex on;
+        }
+      location /apigateway {
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_pass http://localhost:8086;
+        }
+
+	location ~ /(ppadmin) {
+            root   customerhtml;
+            index  index.html index.htm;
+	    try_files $uri $uri/ /index.html;
+        }
+		location /profileImage {
+            alias /apps/application/profile_image;
+			autoindex off;
+        }
+        location ~ /(search){
+            root   customerhtml;
+            index  index.html index.htm;
+	    try_files $uri $uri/ /index.html;
+        }
+	location ~ /(pprevamp) {
+	   root customerhtml;
+	   index index.html index.html;
+	   try_files $uri $uri/ /index.html;
+	}
+	location /dummy {
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_pass http://172.27.71.6:8085;
+        }
+ 
+	location /auth {
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_pass http://localhost:8086;
+        }
+ 
+	
+      location /wow {
+			allow all;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            proxy_pass http://localhost:8086;
+        }
+             
+       location /policypdf {
+			allow all;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            proxy_pass http://localhost:8086;
+
+
+	    proxy_buffering off;
+   	    proxy_request_buffering off;
+            proxy_max_temp_file_size 0;
+
+	    proxy_read_timeout 900;
+            proxy_send_timeout 900;
+            send_timeout 900;
+
+            chunked_transfer_encoding on;
+
+            
+        }
+
+	
+	location /cloudapigateway {
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_pass http://localhost:8086;
+        }
+	location /partnernew {
+		#proxy_connect_timeout 1d;
+		#proxy_send_timeout 1d;
+		#proxy_read_timeout 1d;
+                resolver 172.27.32.2;
+                set $old_partner "hlqap01.hdfcsldm.com";
+                proxy_set_header Host $old_partner;
+                proxy_pass https://$old_partner;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $connection_upgrade;
+        }
+
+location /webticket {
+		#proxy_connect_timeout 1d;
+		#proxy_send_timeout 1d;
+		#proxy_read_timeout 1d;
+                resolver 172.27.32.2;
+                set $old_partner "hlqliksense01.hdfcsldm.com";
+                proxy_set_header Host $old_partner;
+                proxy_pass https://$old_partner;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $connection_upgrade;
+        }
+location /empportal {
+		#proxy_connect_timeout 1d;
+		#proxy_send_timeout 1d;
+		#proxy_read_timeout 1d;
+                resolver 172.27.32.2;
+                set $old_partner "hlqliksense01.hdfcsldm.com";
+                proxy_set_header Host $old_partner;
+                proxy_pass https://$old_partner;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection $connection_upgrade;
+        }
+        
+	#location /js/qlik-require-plugin.js {
+	#	rewrite ^(.*)$ https://partnerpp.hdfclife.com/partnerportal/resources/js/qlik-require-plugin.js redirect;
+	#}
+	location /ErrorDocument {
+                root .;
+                allow all;
+        }
+        location = /error_partner.html {
+            root  ErrorDocument;
+        }
+
+        error_page   500 502 503 504 403 405  /ErrorDocument/error_ip.html;
+ 
+ 
+    }
+    server {
+        listen       8080;
+        server_name  172.27.8.150;
+        #charset koi8-r;
+	expires $expires;
+        access_log  logs/cpcsps.access.log  main;
+	if ($request_method ~ ^(OPTIONS)$ ){
+                        return 403;
+		}
+        location / {
+            root   customerhtml;
+            index  index.html index.htm;
+		try_files $uri $uri/ /index.html;
+        }
+	location = /index.html {
+           	root   customerhtml;
+                add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' always;
+                expires off;
+        }
+	location /dummy {
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_pass http://172.27.71.6:8085;
+        }
+ 
+	location /auth {
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_pass http://localhost:8089;
+        }
+ 
+	location /apigateway {
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+                proxy_pass http://localhost:8089;
+        }
+ 
+	location /ErrorDocument {
+                root .;
+                allow all;
+        }
+        location = /error_partner.html {
+            root  ErrorDocument;
+        }
+        error_page   500 502 503 504 403 405  /ErrorDocument/error_ip.html;
+ 
+ 
+    }
+     server {
+        listen 8080;
+        server_name salesportalpp.hdfclife.com;
+
+        expires $expires;
+        access_log logs/salesportalpp.access.log main;
+
+        # Security Headers
+        add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload" always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-XSS-Protection "1; mode=block" always;
+
+        # Salesâ€‘Portal CORS
+        add_header Access-Control-Allow-Credentials "" always;
+        add_header Access-Control-Allow-Origin "https://salesportalpp.hdfclife.com" always;
+
+        # Disable ETag
+        add_header ETag "";
+
+        # CSP (same as partnerpp)
+        add_header Content-Security-Policy "default-src 'self' *.hdfclife.com blob:; img-src 'self' *.hdfclife.com data:; media-src 'self' *.hdfclife.com; script-src 'self' *.hdfclife.com 'unsafe-eval' 'unsafe-inline' blob:; style-src 'self' *.hdfclife.com *.googleapis.com 'unsafe-inline'; worker-src 'self' blob:; font-src 'self' *.hdfclife.com fonts.gstatic.com; frame-src 'self' data: blob:;" always;
+
+        proxy_cookie_flags SESSION secure httponly samesite=strict;
+        proxy_cookie_flags PCSPSAUTH secure httponly samesite=strict;
+
+        ssl_protocols TLSv1.3;
+        ssl_prefer_server_ciphers off;
+
+        if ($request_method ~ ^(OPTIONS)$) {
+            return 403;
+        }
+
+        # --- UI ROOT ---
+        location ^~ /partner-legacy/ {
+                               alias /apps/application/preprod/nginx/html/;
+                               index index.html;
+                               try_files $uri $uri/ /partner-legacy/index.html;
+                   }
+
+
+        # Reused all partnerpp routing logic for sales portal
+        location /mount {
+            alias /apps/application/contest;
+            autoindex on;
+        }
+
+        location /auth {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+            proxy_pass http://localhost:8086;
+        }
+
+        location /apigateway {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+            proxy_pass http://localhost:8086;
+        }
+
+        location /wow {
+            allow all;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+            proxy_pass http://localhost:8086;
+        }
+
+        location /cloudapigateway {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+            proxy_pass http://localhost:8086;
+        }
+
+        location /ErrorDocument {
+            root .;
+            allow all;
+        }
+
+        location = /error_partner.html {
+            root ErrorDocument;
+        }
+
+        error_page 500 502 503 504 403 405 /ErrorDocument/error_ip.html;
+    }
+	
+server {
+        listen       8080 default_server;
+       server_name _;
+	return 403;
+ 
+									   
+
+											
+								 
+
+									   
+									   
+
+					 
+						 
+										 
+}
+		
+
+        # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+        #
+        #location ~ \.php$ {
+        #    proxy_pass   http://127.0.0.1;
+        #}
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        #location ~ \.php$ {
+        #    root           html;
+        #    fastcgi_pass   127.0.0.1:9000;
+        #    fastcgi_index  index.php;
+        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+        #    include        fastcgi_params;
+        #}
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        #location ~ /\.ht {
+        #    deny  all;
+        #}
+    
+
+
+    # another virtual host using mix of IP-, name-, and port-based configuration
+    #
+    #server {
+    #    listen       8000;
+    #    listen       somename:8080;
+    #    server_name  somename  alias  another.alias;
+
+    #    location / {
+    #        root   html;
+    #        index  index.html index.htm;
+    #    }
+    #}
+
+
+    # HTTPS server
+    #
+    #server {
+    #    listen       443 ssl;
+    #    server_name  localhost;
+
+    #    ssl_certificate      cert.pem;
+    #    ssl_certificate_key  cert.key;
+
+    #    ssl_session_cache    shared:SSL:1m;
+    #    ssl_session_timeout  5m;
+
+    #    ssl_ciphers  HIGH:!aNULL:!MD5;
+    #    ssl_prefer_server_ciphers  on;
+
+    #    location / {
+    #        root   html;
+    #        index  index.html index.htm;
+    #    }
+    #}
+
+}

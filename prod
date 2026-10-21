@@ -1,0 +1,489 @@
+
+#user  nobody;
+worker_processes  1;
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+	more_clear_headers Server;
+																  
+    add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload" always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Content-Security-Policy "default-src 'self' *.hdfclife.com; img-src 'self' *.hdfclife.com data:; media-src 'self' *.hdfclife.com; script-src 'self' *.hdfclife.com 'unsafe-eval'; style-src 'self' *.hdfclife.com *.googleapis.com 'unsafe-inline'; worker-src 'self' blob:; font-src 'self' *.hdfclife.com fonts.gstatic.com; frame-src https://qlikpartnernew.hdfclife.com data: blob:;" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+	
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] $http_x_forwarded_proto "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_amzn_trace_id" "$cookie_SESSION" "$http_x_forwarded_for" ';
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+	# This added to handle request tebt timeouts
+    proxy_read_timeout 900;
+    proxy_send_timeout 900;
+    send_timeout 180;
+    client_body_timeout 180;
+    lingering_timeout 180;
+
+    real_ip_header    X-Forwarded-For;
+    set_real_ip_from 0.0.0.0/0;
+
+    client_max_body_size       5m;
+
+    #resolver 172.27.32.2;											
+    #gzip  on;
+
+	# Expires map
+    map $sent_http_content_type $expires {
+        default                    off;
+        text/html                  epoch;
+        text/css                   max;
+        application/javascript     max;
+        ~image/                    max;
+    }
+
+   upstream servicecluster {
+	ip_hash;
+        server 172.27.39.161:8085 weight=1;
+		server 172.27.40.8:8085 weight=1;
+		server 172.27.42.143:8085 weight=1;
+		
+   }
+
+    upstream portalcluster {
+    ip_hash;
+        server 172.27.38.247:8085 weight=1;
+		server 172.27.43.50:8085 weight=1;
+		server 172.27.41.60:8085 weight=1;
+   }
+
+    upstream apigatewaycluster {
+        #server 172.27.38.247:8086 weight=1;
+		#server 172.27.43.50:8086 weight=1;
+		#server 172.27.41.60:8086 weight=1;
+		server internal-partner-portal-uiux-prod-web-alb-308590050.ap-south-1.elb.amazonaws.com:8086;
+	
+   }
+	upstream qlikcluster {
+        server hlqap01.hdfcsldm.com:443;
+		server hlqliksense01.hdfcsldm.com:443;
+    
+	}	
+
+	server {
+		set $kibana_host "vpc-tebt-csps-prod-v3n74cq2xuspvwavrbyecmurw4.ap-south-1.es.amazonaws.com";
+                listen       8080;
+                server_name "";
+		expires $expires;
+                access_log  logs/access.log  main;
+                error_page   500 502 503 504 403 404 405 /ErrorDocument/error_ip.html;
+		if ($request_method ~ ^(OPTIONS)$ ){
+                        return 403;
+        }
+        if ( $http_user_agent ~ 'ELB-HealthChecker' ) {
+                        return 200 Success;
+        }
+         location /ErrorDocument {
+                       root .;
+                       allow all;
+        }
+		location /kibana  {
+			allow all;
+			return 301 /_plugin/kibana/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(sessionid,userid,level,logmessage,module,fields.hostip),filters:!(),index:'921bae60-1393-11eb-8efa-d3332f5a05c5',interval:auto,query:(language:kuery,query:''),sort:!()) ;
+		}
+		location /_plugin/kibana {
+			allow all;
+			resolver 172.27.32.2;
+        	# Forward requests to Kibana
+        	proxy_pass https://$kibana_host;
+
+        	# Handle redirects to Cognito
+			#proxy_redirect https://$kibana_host/_plugin/kibana http://$host:8080;
+        	#proxy_redirect https://$cognito_host https://$host;
+
+        	# Update cookie domain and path
+        		proxy_cookie_domain $kibana_host $host;
+        		proxy_cookie_path / /_plugin/kibana/;
+
+        	# Response buffer settings
+       	 		proxy_buffer_size 128k;
+        		proxy_buffers 4 256k;
+        		proxy_busy_buffers_size 256k;
+    		}
+            #deny all ;
+			allow all ;
+        }	
+
+		map $http_upgrade $connection_upgrade {
+		default upgrade;
+		'' close;
+	}
+		 
+    server {
+        listen       80;
+        server_name  partner.hdfclife.com;
+
+		resolver 172.27.32.2;
+		set $portalcluster "internal-partner-portal-uiux-prod-web-alb-308590050.ap-south-1.elb.amazonaws.com:8085" ;
+		set $apigatewaycluster "internal-partner-portal-uiux-prod-web-alb-308590050.ap-south-1.elb.amazonaws.com:8086" ;				  
+		#charset koi8-r;
+		expires $expires;			  
+
+		access_log  logs/pcsps.access.log  main;
+		
+
+		if ($request_method ~ ^(OPTIONS)$ ){
+             return 403 'Forbidden';
+        }
+
+		location / {
+			add_header X-Frame-Options SAMEORIGIN always;										  
+            root   html;
+            index  index.html index.htm;
+			try_files $uri $uri/ /index.html;
+		}
+		
+		location /ContestEarnings {
+            root .;
+            autoindex on;
+        }
+		
+		location ~ /(ppadmin) {
+            root   customerhtml;
+            index  index.html index.htm;
+			try_files $uri $uri/ /index.html;
+        }
+		location /profileImage {
+            alias /apps/application/profile_image;
+			autoindex off;
+        }
+		
+		location = /index.html {
+			add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' always;
+			add_header X-Frame-Options SAMEORIGIN always;
+			add_header Content-Security-Policy "default-src 'self' *.hdfclife.com *.adobedtm.com *.demdex.net *.omtrdc.net; img-src https: data:; media-src 'self' *.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.adobedtm.com *.googleapis.com *.notifyvisitors.com *.hdfclife.com *.cloudflareinsights.com ; style-src 'self' 'unsafe-inline' *.hdfclife.com *.googleapis.com; worker-src 'self' blob:; font-src 'self' 'unsafe-inline' data: fonts.gstatic.com; connect-src 'self' https: wss: *.hdfclife.com; frame-ancestors *.hdfclife.com ; frame-src https://qlikpartnernew.hdfclife.com data: blob:;" always;
+			add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload" always;
+			add_header X-Content-Type-Options nosniff always;
+			add_header X-XSS-Protection "1; mode=block" always;
+			#add_header Access-Control-Allow-Origin "https://qlikpartnernew.hdfclife.com" always;
+
+			expires off;
+		
+        }
+
+		#location /dummy {
+			#proxy_set_header Host $host;
+			#proxy_set_header X-Real-IP $remote_addr;
+			#proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+			#proxy_pass http://portalcluster;
+			#proxy_pass http://$portalcluster;
+			#proxy_redirect http://$host:8085/  https://$host/;
+		#}
+		
+		location /auth {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://apigatewaycluster;
+			proxy_pass http://$apigatewaycluster;							  
+        }
+		
+		location /portal {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://portalcluster;
+			proxy_pass http://$portalcluster;
+			proxy_redirect http://$host:8085/  https://$host/;
+        }
+
+		location /apigateway {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://apigatewaycluster;
+			proxy_pass http://$apigatewaycluster;
+        }
+            
+            location  /wow {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+             #proxy_pass http://apigatewaycluster;
+			proxy_pass http://$apigatewaycluster;
+        }
+
+            location /policypdf {
+			allow all;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://apigatewaycluster;
+			proxy_pass http://$apigatewaycluster;
+
+
+	    proxy_buffering off;
+   	    proxy_request_buffering off;
+            proxy_max_temp_file_size 0;
+
+	    proxy_read_timeout 900;
+            proxy_send_timeout 900;
+            send_timeout 900;
+
+            chunked_transfer_encoding on;
+
+            
+        }
+
+
+		
+		location /cloudapigateway {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://apigatewaycluster;
+		    proxy_pass http://$apigatewaycluster;
+        }
+		
+				
+		location /js/qlik-require-plugin.js {
+             rewrite ^(.*)$ https://partner.hdfclife.com/partnernew/resources/js/qlik-require-plugin.js redirect;
+        }
+
+		location /ErrorDocument {
+             root .;
+             allow all;
+        }
+		
+        location = /error_partner.html {
+			root  ErrorDocument;
+        }
+		
+		error_page   500 502 503 504 403 404 405 /ErrorDocument/error_ip.html;
+		  
+   }
+	
+	server {
+        listen       80;
+        server_name  salesportal.hdfclife.com;
+
+		resolver 172.27.32.2;
+		
+        set $portalcluster "internal-partner-portal-uiux-prod-web-alb-308590050.ap-south-1.elb.amazonaws.com:8085" ;
+        set $apigatewaycluster "internal-partner-portal-uiux-prod-web-alb-308590050.ap-south-1.elb.amazonaws.com:8086" ;				  
+        #charset koi8-r;
+		expires $expires;			  
+
+        access_log  logs/pcsps.access.log  main;
+	
+
+		
+		if ($request_method ~ ^(OPTIONS)$ ){
+            return 403 'Forbidden';
+        }
+
+		location / {
+			add_header X-Frame-Options SAMEORIGIN always;										  
+            root   html;
+            index  index.html index.htm;
+			try_files $uri $uri/ /index.html;
+		}
+		
+		location /ContestEarnings {
+            root .;
+            autoindex on;
+        }
+		
+		location ~ /(ppadmin) {
+            root   customerhtml;
+            index  index.html index.htm;
+			try_files $uri $uri/ /index.html;
+        }
+		
+		location = /index.html {
+			add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' always;
+			add_header X-Frame-Options SAMEORIGIN always;
+			add_header Content-Security-Policy "default-src 'self' *.hdfclife.com *.adobedtm.com *.demdex.net *.omtrdc.net; img-src https: data:; media-src 'self' *.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.adobedtm.com *.googleapis.com *.notifyvisitors.com *.hdfclife.com *.cloudflareinsights.com ; style-src 'self' 'unsafe-inline' *.hdfclife.com *.googleapis.com; worker-src 'self' blob:; font-src 'self' 'unsafe-inline' data: fonts.gstatic.com; connect-src 'self' https: wss: *.hdfclife.com; frame-ancestors *.hdfclife.com" always;
+			add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload" always;
+			add_header X-Content-Type-Options nosniff always;
+			add_header X-XSS-Protection "1; mode=block" always;
+			#add_header Access-Control-Allow-Origin "https://qlikpartnernew.hdfclife.com" always;
+
+            expires off;
+        }
+		
+		#location /dummy {
+			#proxy_set_header Host $host;
+			#proxy_set_header X-Real-IP $remote_addr;
+			#proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://portalcluster;
+			#proxy_pass http://$portalcluster;
+			#proxy_redirect http://$host:8085/  https://$host/;
+        #}
+		
+		location /auth {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://apigatewaycluster;
+			proxy_pass http://$apigatewaycluster;							  
+        }
+		
+		location /portal {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://portalcluster;
+			proxy_pass http://$portalcluster;
+			proxy_redirect http://$host:8085/  https://$host/;
+            #proxy_pass http://$apigatewaycluster;
+        }
+
+		location /apigateway {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://apigatewaycluster;
+			proxy_pass http://$apigatewaycluster;
+        }
+		
+		location /cloudapigateway {
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header   X-Forwarded-Proto $http_x_forwarded_proto;
+            #proxy_pass http://apigatewaycluster;
+		    proxy_pass http://$apigatewaycluster;
+        }
+		
+		location /empportal {
+			resolver 172.27.32.2;
+			set $old_partner "hlqliksense01.hdfcsldm.com";
+			proxy_set_header Host $old_partner;
+			proxy_pass https://$old_partner;
+			proxy_http_version 1.1;
+        	proxy_set_header Upgrade $http_upgrade;
+        	proxy_set_header Connection $connection_upgrade;
+	}
+	
+		#location /js/qlik-require-plugin.js {
+          #  rewrite ^(.*)$ https://salesportal.hdfclife.com/empportal/resources/js/qlik-require-plugin.js redirect;
+		#}
+
+		location /ErrorDocument {
+            root .;
+            allow all;
+		}
+	
+		location = /error_partner.html {
+          root  ErrorDocument;
+		}
+	
+		error_page   500 502 503 504 403 404 405 /ErrorDocument/error_ip.html;
+		  
+   }
+   
+   server {
+        listen       80;
+        server_name  qlikpartnernew.hdfclife.com;
+
+        resolver 172.27.32.2;
+        #charset koi8-r;
+        expires $expires;
+
+		proxy_hide_header Access-Control-Allow-Origin;
+		proxy_hide_header Access-Control-Allow-Credentials;
+		
+		
+
+		
+		access_log  logs/pcsps.access.log  main;
+
+		#if ($request_method ~ ^(OPTIONS)$ ){
+		#                return 403 'Forbidden';
+		#}
+
+        location / {
+            add_header X-Frame-Options SAMEORIGIN always;
+			root   html;
+			index  index.html index.htm;
+            try_files $uri $uri/ /index.html;
+        }
+		
+        location = /index.html {
+            add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0' always;
+            add_header X-Frame-Options SAMEORIGIN always;
+			add_header Content-Security-Policy "default-src 'self' *.hdfclife.com *.adobedtm.com *.demdex.net *.omtrdc.net; img-src https: data:; media-src 'self' *.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.adobedtm.com *.googleapis.com *.notifyvisitors.com *.hdfclife.com *.cloudflareinsights.com ; style-src 'self' 'unsafe-inline' *.hdfclife.com *.googleapis.com; worker-src 'self' blob:; font-src 'self' 'unsafe-inline' data: fonts.gstatic.com; connect-src 'self' https: wss: *.hdfclife.com; frame-ancestors *.hdfclife.com" always;
+			add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload" always;
+			add_header X-Content-Type-Options nosniff always;
+			add_header X-XSS-Protection "1; mode=block" always;
+			
+            expires off;
+        }
+
+		location /partnernew {
+			#proxy_connect_timeout 1d;
+			#proxy_send_timeout 1d;
+			#proxy_read_timeout 1d;
+            resolver 172.27.32.2;
+            set $old_partner "hlqap01.hdfcsldm.com";
+            proxy_set_header Host $old_partner;
+            proxy_pass https://$old_partner;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+	    add_header Access-Control-Allow-Credentials "true";
+	    add_header Access-Control-Allow-Origin "https://partner.hdfclife.com" always;
+	    add_header Vary "Origin" always;	
+        }
+		
+		location /empportal {
+			#proxy_connect_timeout 1d;
+			#proxy_send_timeout 1d;
+			#proxy_read_timeout 1d;
+			resolver 172.27.32.2;
+            set $old_partner "hlqliksense01.hdfcsldm.com";
+            proxy_set_header Host $old_partner;
+            proxy_pass https://$old_partner;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+	    add_header Access-Control-Allow-Credentials "true";
+	    add_header Access-Control-Allow-Origin "https://salesportal.hdfclife.com" always;	
+	    add_header Vary "Origin" always;
+        }
+
+        #location /js/qlik-require-plugin.js {
+			#rewrite ^(.*)$ https://partnernew.hdfclife.com/partnernew/resources/js/qlik-require-plugin.js redirect;
+        #}
+
+       
+
+    }
+
+}
+
